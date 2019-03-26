@@ -4,6 +4,8 @@ import java.util.*;
 
 public class LCS {
     
+	
+	//	WILL THE STRINGS ALWAYS BE THE SAME LENGTH? 
     /**
      * memoCheck is used to verify the state of your tabulation after
      * performing bottom-up and top-down DP. Make sure to set it after
@@ -28,7 +30,7 @@ public class LCS {
     	int[][] bottomUp = new int[rStr.length()][cStr.length()];
     	for (int row = 0; row < rStr.length(); row++) {
     		for (int column = 0; column < cStr.length(); column++) {
-    			if((column == 0 && row == 0) || row == 0) {
+    			if(column == 0 && row == 0) {
     				bottomUp[row][column] = 0;
     			} else {
     				if(rStr.charAt(row) == cStr.charAt(column)) {
@@ -36,6 +38,8 @@ public class LCS {
     				} else if (rStr.charAt(row) != cStr.charAt(column)){
     					if (column == 0) {
     						bottomUp[row][column] = bottomUp[row - 1][column];
+    					} else if (row == 0) {
+    						bottomUp[row][column] = bottomUp[row][column - 1];
     					} else {
         			    	bottomUp[row][column] = Math.max(bottomUp[row - 1][column], bottomUp[row][column - 1]);
     					}
@@ -64,54 +68,45 @@ public class LCS {
      * @return The longest common subsequence between rStr and cStr +
      *         [Side Effect] sets memoCheck to refer to table
      */
-    public static Set<String> bottomUpLCS (String rStr, String cStr) {
-    	Set<String> LCS = new HashSet<String>();
-    	String currentLCSSolution = "";
-    	makeBottomUpTable(rStr, cStr);
-    	int row = rStr.length() - 1;
-    	int column = cStr.length() - 1;
-    	while(true) {
-    		// GO THROUGH CASES 
-    		if(rStr.charAt(row) != cStr.charAt(column)) {
-        		if(memoCheck[row][column] == memoCheck[row - 1][column] 
-        			&& memoCheck[row - 1][column] != memoCheck[row][column]) {
-        			row = row - 1;
-        			if (column == 0) {
-        				break;
-        			} else {
-        				column--;
-        			}
-        		} else if (memoCheck[row][column] != memoCheck[row - 1][column] 
-        			&& memoCheck[row - 1][column] == memoCheck[row][column]) {
-        			column = column - 1;
-        			if (row == 0) {
-        				break;
-        			} else {
-        				row--;
-        			}
-        		} else if (memoCheck[row][column] == memoCheck[row - 1][column] 
-        			&& memoCheck[row - 1][column] == memoCheck[row][column]) {
-        			column = column - 1;
-        			if (row == 0) {
-        				break;
-        			} else {
-        				row--;
-        			}
-        		}
-        	} else if (rStr.charAt(row) == cStr.charAt(column)) {
-        		currentLCSSolution += Character.toString(rStr.charAt(row - 1));
-        		row = row - 1;
-        		column = column - 1; 
-        	}
+    
+    public static Set<String> collectSolution(String rStr, String cStr, int r, int c, int[][] memo, Set<String> LCSs) {
+    	System.out.println(Integer.toString(r) + Integer.toString(c));
+    	System.out.println(" ");
+    	if(r == 0 || c == 0) {
+    		return LCSs;
+//        	return new HashSet<String>();
     	}
-    	System.out.println(currentLCSSolution);
-    	// START at the bottom rihgt cell
-    	// T[r][c]==T[r−1][c] OR T[r][c]==T[r][c−1]
-    		// then the LCS must have come from paths on 
-    		// these sides of the current cell, so traverse 
-    		//  to the cell (either one if both) that has the same value.
-    	// 
-    	return LCS;
+    	System.out.println(r);
+    	System.out.println(c);
+    	if(rStr.charAt(r) == cStr.charAt(c)) {
+    		System.out.println("gotya");
+    		for(String LCS : LCSs) {
+    			String newLCS = LCS + Character.toString(rStr.charAt(r));
+    			LCSs.remove(LCS);
+    			LCSs.add(newLCS);
+    			System.out.println("fuck");
+    		}
+    		return collectSolution(rStr.substring(0, rStr.length() - 1), cStr.substring(0, cStr.length() - 1), r - 1, c - 1, memo, LCSs);
+    	}
+    	LCSs = new HashSet<String>();
+    	if(rStr.charAt(r) != cStr.charAt(c)) {
+    		if(memoCheck[r][c -1] >= memoCheck[r - 1][c]) {
+        		LCSs.addAll(collectSolution(rStr.substring(0, rStr.length()), cStr.substring(0, cStr.length() - 1), r, c - 1, memo, LCSs));
+    		} else if (memoCheck[r][c -1] <= memoCheck[r - 1][c]) {
+        		LCSs.addAll(collectSolution(rStr.substring(0, rStr.length() - 1), cStr.substring(0, cStr.length()), r - 1, c, memo, LCSs));
+    		}
+    	}
+    	return LCSs;
+    }
+    
+    public static Set<String> bottomUpLCS (String rStr, String cStr) {
+    	makeBottomUpTable(rStr, cStr);
+    	rStr = "0" + rStr;
+    	cStr = "0" + cStr;
+    	System.out.println("made it");
+    	Set<String> LCSs = new HashSet<String>();
+    	LCSs.add("");
+    	return collectSolution(rStr, cStr, rStr.length() - 1, cStr.length() - 1, memoCheck, LCSs);
     }
     
     // [!] TODO: Add any bottom-up specific helpers here!
@@ -155,8 +150,8 @@ public class LCS {
     // [!] TODO: Add any top-down specific helpers here!
     public static void main(String args[]) {
     	// DO WE CARE CAPITALIZATION
-    	makeBottomUpTable("ABA","BAA");
-    	bottomUpLCS("ABA","BAA");
+    	makeBottomUpTable("AXBCZ","XABZC");
+    	bottomUpLCS("AXBCZ","XABZC");
     	
     }
     
