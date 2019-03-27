@@ -24,29 +24,28 @@ public static int[][] memoCheck;
 // Bottom-Up LCS
 // -----------------------------------------------
 
-private static void makeBottomUpTable(String rStr, String cStr) {
-	rStr = "0" + rStr;
-	cStr = "0" + cStr;
-	memoCheck = new int[rStr.length()][cStr.length()];
+private static int[][] makeBottomUpTable(String rStr, String cStr, int[][] bottomUpTable) {
+	bottomUpTable = new int[rStr.length()][cStr.length()];
 	for (int row = 0; row < rStr.length(); row++) {
 		for (int column = 0; column < cStr.length(); column++) {
 			if(column == 0 && row == 0) {
-				memoCheck[row][column] = 0;
+				bottomUpTable[row][column] = 0;
 			} else {
 				if(rStr.charAt(row) == cStr.charAt(column)) {
-					memoCheck[row][column] = memoCheck[row - 1][column] + 1;
+					bottomUpTable[row][column] = bottomUpTable[row - 1][column] + 1;
 				} else if (rStr.charAt(row) != cStr.charAt(column)){
 					if (column == 0) {
-						memoCheck[row][column] = memoCheck[row - 1][column];
+						bottomUpTable[row][column] = bottomUpTable[row - 1][column];
 					} else if (row == 0) {
-						memoCheck[row][column] = memoCheck[row][column - 1];
+						bottomUpTable[row][column] = bottomUpTable[row][column - 1];
 					} else {
-						memoCheck[row][column] = Math.max(memoCheck[row - 1][column], memoCheck[row][column - 1]);
+						bottomUpTable[row][column] = Math.max(bottomUpTable[row - 1][column], bottomUpTable[row][column - 1]);
 					}
 				}
 			}
 		}
 	}
+	return bottomUpTable;
 //	for(int i = 0; i < rStr.length(); i++) {
 //		for(int j = 0; j < cStr.length(); j++) {
 //			if (j != cStr.length() - 1) {
@@ -78,7 +77,7 @@ private static Set<String> newSetWithAddedCharToEachLCSString(char currentChar, 
  *         [Side Effect] sets memoCheck to refer to table
  */
 
-private static Set<String> collectSolution(String rStr, String cStr, int row, int column, int[][] memo) {
+private static Set<String> collectSolution(String rStr, String cStr, int row, int column, int[][] memoizedTable) {
 //    	System.out.println(Integer.toString(r) + "," + Integer.toString(c));
 	if(row == 0 || column == 0) {
 //    		System.out.println("I GOT THE EMPTY SET");
@@ -88,14 +87,14 @@ private static Set<String> collectSolution(String rStr, String cStr, int row, in
 	}
 	if(rStr.charAt(row) == cStr.charAt(column)) {
 //    		System.out.println("CHARS MATCH");
-		return newSetWithAddedCharToEachLCSString(rStr.charAt(row), collectSolution(rStr, cStr, row - 1, column - 1, memo));
+		return newSetWithAddedCharToEachLCSString(rStr.charAt(row), collectSolution(rStr, cStr, row - 1, column - 1, memoizedTable));
 	}
 	Set<String> LCSs = new HashSet<String>();
-	if(memoCheck[row][column -1] >= memoCheck[row - 1][column]) {
-		LCSs.addAll(collectSolution(rStr, cStr, row, column - 1, memo));
+	if(memoizedTable[row][column -1] >= memoizedTable[row - 1][column]) {
+		LCSs.addAll(collectSolution(rStr, cStr, row, column - 1, memoizedTable));
 	}
-	if (memoCheck[row][column -1] <= memoCheck[row - 1][column]) {
-		LCSs.addAll(collectSolution(rStr, cStr, row - 1, column, memo));
+	if (memoizedTable[row][column -1] <= memoizedTable[row - 1][column]) {
+		LCSs.addAll(collectSolution(rStr, cStr, row - 1, column, memoizedTable));
 	}
 	return LCSs;
 }
@@ -113,10 +112,10 @@ public static Set<String> bottomUpLCS (String rStr, String cStr) {
 			// anser: it has to do with the call stack each recursive call piles on top of the previous call 
 		// WHY WE NEED A TOP DOWN FILL IS CUZ YOU NEED TO COMPARE ABOVE AND TO THE LEFT SO YOU CANT JUST DO COLLECT 
 			// becakse ou need to compare in the table the numbebrs at the top and left 
-		
-	makeBottomUpTable(rStr, cStr);
 	rStr = "0" + rStr;
 	cStr = "0" + cStr;
+	int[][] bottomUpTable = new int[rStr.length()][cStr.length()];
+	memoCheck = makeBottomUpTable(rStr, cStr, bottomUpTable);
 	return collectSolution(rStr, cStr, rStr.length() - 1, cStr.length() - 1, memoCheck);
 		
 }
@@ -128,25 +127,24 @@ public static Set<String> bottomUpLCS (String rStr, String cStr) {
 // Top-Down LCS
 // -----------------------------------------------
 
-private static int makeTopDownTable(String rStr, String cStr, int row, int column, boolean[][] haveVisited) {
+private static int makeTopDownTable(String rStr, String cStr, int row, int column, boolean[][] haveVisited, int[][] memoizedTable) {
 		// fill witht he length of substring 
-	System.out.println(column);
-	System.out.println(row);
+//	System.out.println(column);
+//	System.out.println(row);
 	if(column == 0 || row == 0) {
-		memoCheck[row][column] = 0;
+		memoizedTable[row][column] = 0;
 		return 0;
 	}
 	if(haveVisited[row][column] != true) {
 		if(rStr.charAt(row) == cStr.charAt(column)) {
 			haveVisited[row][column] = true;
-			memoCheck[row][column] = makeTopDownTable(rStr, cStr, row - 1, column - 1, haveVisited) + 1;
+			memoizedTable[row][column] = makeTopDownTable(rStr, cStr, row - 1, column - 1, haveVisited, memoizedTable) + 1;
 		} else {
-			haveVisited[row][column] = true;
-			memoCheck[row][column] = Math.max(makeTopDownTable(rStr, cStr, row - 1, column, haveVisited), makeTopDownTable(rStr, cStr, row, column - 1, haveVisited));
+			memoizedTable[row][column] = Math.max(makeTopDownTable(rStr, cStr, row - 1, column, haveVisited, memoizedTable), makeTopDownTable(rStr, cStr, row, column - 1, haveVisited, memoizedTable));
 			
 		}
 	}
-	return memoCheck[row][column];
+	return memoizedTable[row][column];
 }
 
 
@@ -161,9 +159,10 @@ private static int makeTopDownTable(String rStr, String cStr, int row, int colum
  */
 public static Set<String> topDownLCS (String rStr, String cStr) {
 	boolean[][] haveVisited = new boolean[rStr.length() + 1][cStr.length() + 1];
+	memoCheck = new int[rStr.length() + 1][cStr.length() + 1];
 	rStr = "0" + rStr;
 	cStr = "0" + cStr;
-	int dog = makeTopDownTable(rStr, cStr, rStr.length() - 1, cStr.length() - 1, haveVisited);
+	makeTopDownTable(rStr, cStr, rStr.length() - 1, cStr.length() - 1, haveVisited, memoCheck);
 	for(int i = 0; i < rStr.length(); i++) {
 		for(int j = 0; j < cStr.length(); j++) {
 			if (j != cStr.length() - 1) {
@@ -183,14 +182,14 @@ public static void main(String args[]) {
 //    	bottomUpLCS("AXBCZ","XABZC");
 	// WORKS PARTIALLY FOR THIS ONE IT GETS TO A BUT FAILS WHEN 
 	// IT'S B BECAUSE 0 TO THE TOP AND 0 TO THE RIGHT 
-//	Set<String> solutionBottomUp = bottomUpLCS("AXBCZ","XABZC");
-//    	for(String LCS : solutionBottomUp) {
-//    		System.out.println(LCS);
-//    	}
-    
-	Set<String> solutionTopDown = topDownLCS("AXBCZ","XABZC");
-	for(String LCS : solutionTopDown) {
-		System.out.println(LCS);
-	}
+	Set<String> solutionBottomUp = bottomUpLCS("AXBCZ","XABZC");
+    	for(String LCS : solutionBottomUp) {
+    		System.out.println(LCS);
+    	}
+////    memoCheck = new int[6][6];
+//	Set<String> solutionTopDown = topDownLCS("AXBCZ","XABZC");
+//	for(String LCS : solutionTopDown) {
+//		System.out.println(LCS);
+//	}
 	}
 }
