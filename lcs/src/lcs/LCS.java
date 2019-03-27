@@ -24,7 +24,7 @@ public class LCS {
     // Bottom-Up LCS
     // -----------------------------------------------
     
-    public static void makeBottomUpTable(String rStr, String cStr) {
+    private static void makeBottomUpTable(String rStr, String cStr) {
     	rStr = "0" + rStr;
     	cStr = "0" + cStr;
     	int[][] bottomUp = new int[rStr.length()][cStr.length()];
@@ -59,6 +59,16 @@ public class LCS {
     	}
     }
     
+    // HELPER FUNCTION THAT HANDLES ADDING THE LAST CHAR
+    private static Set<String> newSetWithAddedCharToEachLCSString(char currentChar, Set<String> LCSs) {
+    	Set<String> LCSsCopy = new HashSet<String>();
+    	for(String LCS: LCSs) {
+    		LCSsCopy.add( LCS + Character.toString(currentChar));
+//    		System.out.println(LCS);
+    	}
+    	return LCSsCopy;
+    }
+    
     /**
      * Bottom-up dynamic programming approach to the LCS problem, which
      * solves larger and larger subproblems iterative using a tabular
@@ -69,44 +79,47 @@ public class LCS {
      *         [Side Effect] sets memoCheck to refer to table
      */
     
-    public static Set<String> collectSolution(String rStr, String cStr, int r, int c, int[][] memo, Set<String> LCSs) {
-    	System.out.println(Integer.toString(r) + Integer.toString(c));
-    	System.out.println(" ");
+    private static Set<String> collectSolution(String rStr, String cStr, int r, int c, int[][] memo) {
+//    	System.out.println(Integer.toString(r) + "," + Integer.toString(c));
     	if(r == 0 || c == 0) {
-    		return LCSs;
-//        	return new HashSet<String>();
+//    		System.out.println("I GOT THE EMPTY SET");
+        	Set<String> setContainingEmptyString = new HashSet<String>();
+        	setContainingEmptyString.add("");
+        	return setContainingEmptyString;
     	}
-    	System.out.println(r);
-    	System.out.println(c);
     	if(rStr.charAt(r) == cStr.charAt(c)) {
-    		System.out.println("gotya");
-    		for(String LCS : LCSs) {
-    			String newLCS = LCS + Character.toString(rStr.charAt(r));
-    			LCSs.remove(LCS);
-    			LCSs.add(newLCS);
-    			System.out.println("fuck");
-    		}
-    		return collectSolution(rStr.substring(0, rStr.length() - 1), cStr.substring(0, cStr.length() - 1), r - 1, c - 1, memo, LCSs);
+//    		System.out.println("CHARS MATCH");
+    		return newSetWithAddedCharToEachLCSString(rStr.charAt(r), collectSolution(rStr, cStr, r - 1, c - 1, memo));
     	}
-    	LCSs = new HashSet<String>();
-    	if(rStr.charAt(r) != cStr.charAt(c)) {
-    		if(memoCheck[r][c -1] >= memoCheck[r - 1][c]) {
-        		LCSs.addAll(collectSolution(rStr.substring(0, rStr.length()), cStr.substring(0, cStr.length() - 1), r, c - 1, memo, LCSs));
-    		} else if (memoCheck[r][c -1] <= memoCheck[r - 1][c]) {
-        		LCSs.addAll(collectSolution(rStr.substring(0, rStr.length() - 1), cStr.substring(0, cStr.length()), r - 1, c, memo, LCSs));
-    		}
-    	}
+    	Set<String> LCSs = new HashSet<String>();
+		if(memoCheck[r][c -1] >= memoCheck[r - 1][c]) {
+    		LCSs.addAll(collectSolution(rStr, cStr, r, c - 1, memo));
+		}
+		if (memoCheck[r][c -1] <= memoCheck[r - 1][c]) {
+    		LCSs.addAll(collectSolution(rStr, cStr, r - 1, c, memo));
+		}
     	return LCSs;
     }
     
     public static Set<String> bottomUpLCS (String rStr, String cStr) {
+    	
+    	// 2 ISSUES:
+    		// 1) IT WON'T LET ME ITERATE OVER THE VALUES IN THE HASH SET SO
+    		// NOTHING IS UPDATING, i think the issue is the way i'm unionizing 
+    		// because in the example i use there's a scenario where the letter's
+    		// don't match but they're equal 
+    		// 2) I DON'T THINK I HAVE A BACKWARDS APPROACH RIGHT NOW THE WAY
+    			// THE RECURSION IS STRUCTURED FOR THIS IS CONFUSING ME 
+    			// PLEASE EXPLAIN THE UNION
+    			// anser: it has to do with the call stack each recursive call piles on top of the previous call 
+    		// WHY WE NEED A TOP DOWN FILL IS CUZ YOU NEED TO COMPARE ABOVE AND TO THE LEFT SO YOU CANT JUST DO COLLECT 
+    			// becakse ou need to compare in the table the numbebrs at the top and left 
+    		
     	makeBottomUpTable(rStr, cStr);
     	rStr = "0" + rStr;
     	cStr = "0" + cStr;
-    	System.out.println("made it");
-    	Set<String> LCSs = new HashSet<String>();
-    	LCSs.add("");
-    	return collectSolution(rStr, cStr, rStr.length() - 1, cStr.length() - 1, memoCheck, LCSs);
+    	return collectSolution(rStr, cStr, rStr.length() - 1, cStr.length() - 1, memoCheck);
+    		
     }
     
     // [!] TODO: Add any bottom-up specific helpers here!
@@ -116,21 +129,10 @@ public class LCS {
     // Top-Down LCS
     // -----------------------------------------------
     
-    
-    public static void makeTopDownTable(String rStr, String cStr) {
-    	int row = rStr.length() - 1;
-    	int column = cStr.length() - 1;
-//    	memoCheck = topDown;
-//    	for(int i = 0; i < rStr.length(); i++) {
-//    		for(int j = 0; j < cStr.length(); j++) {
-//    			if (j != cStr.length() - 1) {
-//            		System.out.print(Integer.toString(memoCheck[i][j]) + " ");
-//    			} else {
-//            		System.out.println(memoCheck[i][j]);
-//    			}
-//        	}
-//    	}
-    	// 
+    private static void makeTopDownTable(String rStr, String cStr) {
+    	int[][] topDown = new int[rStr.length()][cStr.length()];
+    	// you need to make a separate 2d array to memoize this it needs to be a boolean array true or false if you've
+    	// already arrived at this location 
     }
     
     
@@ -150,9 +152,14 @@ public class LCS {
     // [!] TODO: Add any top-down specific helpers here!
     public static void main(String args[]) {
     	// DO WE CARE CAPITALIZATION
-    	makeBottomUpTable("AXBCZ","XABZC");
-    	bottomUpLCS("AXBCZ","XABZC");
-    	
+    	// THIS DOESN'T WORK FROM THE JUMP BECAUSE INITIAL IS 3,3
+//    	bottomUpLCS("AXBCZ","XABZC");
+    	// WORKS PARTIALLY FOR THIS ONE IT GETS TO A BUT FAILS WHEN 
+    	// IT'S B BECAUSE 0 TO THE TOP AND 0 TO THE RIGHT 
+    	Set<String> solutionBottomUp = bottomUpLCS("AXBCZ","XABZC");
+    	for(String LCS : solutionBottomUp) {
+    		System.out.println(LCS);
+    	}
     }
     
 }
