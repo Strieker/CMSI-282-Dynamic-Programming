@@ -6,6 +6,15 @@ import java.util.HashSet;
 import java.util.Arrays;
 
 public class LCSTests {
+	// TO TEST:
+		// strings of different length
+		// hella multiple possible solutions 
+		// numbers 
+		// punctuation 
+		// lower case letters
+		// SUUUUUPER LONG 
+		// no common substring
+	
     
     // Bottom-up LCS Tests
     // -----------------------------------------------
@@ -91,6 +100,52 @@ public class LCSTests {
                 {0, 0, 1, 1},
                 {0, 1, 1, 1},
                 {0, 1, 2, 2}
+            },
+            LCS.memoCheck
+        );
+    }
+    
+    @Test
+    public void BULCSTest_t5() {
+        assertEquals(
+            new HashSet<>(Arrays.asList(
+                "AA", "BA"
+            )),
+            LCS.bottomUpLCS("GCGCAATG", "GCCCTAGCG")
+        );
+        LCS.bottomUpLCS("GCGCAATG", "GCCCTAGCG");
+        assertArrayEquals(
+            new int[][] {
+                {0,0,0,0,0,0,0,0,0,0},
+                {0,1,1,1,1,1,1,1,1,1},
+                {0,1,2,2,2,2,2,2,2,2},
+                {0,1,2,2,2,2,2,3,3,3},
+                {0,1,2,3,3,3,3,3,4,4},
+                {0,1,2,3,3,3,4,4,4,4},
+                {0,1,2,3,3,3,4,4,4,4},
+                {0,1,2,3,3,4,4,4,4,4},
+                {0,1,2,3,3,4,4,5,5,5},
+
+            },
+            LCS.memoCheck
+        );
+    }
+    
+    @Test
+    public void BULCSTest_t6() {
+        assertEquals(
+            new HashSet<>(Arrays.asList(
+                "AT"
+            )),
+            LCS.bottomUpLCS("CAT", "AT")
+        );
+        assertArrayEquals(
+            new int[][] {
+            	{0,0,0},
+            	{0,0,0},
+            	{0,1,1},
+            	{0,1,2}
+
             },
             LCS.memoCheck
         );

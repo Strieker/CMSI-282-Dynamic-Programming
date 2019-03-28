@@ -32,7 +32,7 @@ private static int[][] makeBottomUpTable(String rStr, String cStr, int[][] botto
 				bottomUpTable[row][column] = 0;
 			} else {
 				if(rStr.charAt(row) == cStr.charAt(column)) {
-					bottomUpTable[row][column] = bottomUpTable[row - 1][column] + 1;
+					bottomUpTable[row][column] = bottomUpTable[row - 1][column - 1] + 1;
 				} else if (rStr.charAt(row) != cStr.charAt(column)){
 					if (column == 0) {
 						bottomUpTable[row][column] = bottomUpTable[row - 1][column];
@@ -45,16 +45,17 @@ private static int[][] makeBottomUpTable(String rStr, String cStr, int[][] botto
 			}
 		}
 	}
+	for(int i = 0; i < rStr.length(); i++) {
+		for(int j = 0; j < cStr.length(); j++) {
+			if (j != cStr.length() - 1) {
+        		System.out.print(Integer.toString(bottomUpTable[i][j]) + " ");
+			} else {
+        		System.out.println(bottomUpTable[i][j]);
+			}
+    	}
+	}
 	return bottomUpTable;
-//	for(int i = 0; i < rStr.length(); i++) {
-//		for(int j = 0; j < cStr.length(); j++) {
-//			if (j != cStr.length() - 1) {
-//        		System.out.print(Integer.toString(memoCheck[i][j]) + " ");
-//			} else {
-//        		System.out.println(memoCheck[i][j]);
-//			}
-//    	}
-//	}
+
 }
 
 // HELPER FUNCTION THAT HANDLES ADDING THE LAST CHAR
@@ -140,7 +141,8 @@ private static int makeTopDownTable(String rStr, String cStr, int row, int colum
 			haveVisited[row][column] = true;
 			memoizedTable[row][column] = makeTopDownTable(rStr, cStr, row - 1, column - 1, haveVisited, memoizedTable) + 1;
 		} else {
-			memoizedTable[row][column] = Math.max(makeTopDownTable(rStr, cStr, row - 1, column, haveVisited, memoizedTable), makeTopDownTable(rStr, cStr, row, column - 1, haveVisited, memoizedTable));
+			memoizedTable[row][column] = Math.max(makeTopDownTable(rStr, cStr, row - 1, column, haveVisited, memoizedTable), 
+					makeTopDownTable(rStr, cStr, row, column - 1, haveVisited, memoizedTable));
 			
 		}
 	}
@@ -182,7 +184,7 @@ public static void main(String args[]) {
 //    	bottomUpLCS("AXBCZ","XABZC");
 	// WORKS PARTIALLY FOR THIS ONE IT GETS TO A BUT FAILS WHEN 
 	// IT'S B BECAUSE 0 TO THE TOP AND 0 TO THE RIGHT 
-	Set<String> solutionBottomUp = bottomUpLCS("AXBCZ","XABZC");
+	Set<String> solutionBottomUp = bottomUpLCS("GCGCAATG", "GCCCTAGCG");
     	for(String LCS : solutionBottomUp) {
     		System.out.println(LCS);
     	}
