@@ -66,6 +66,30 @@ public class LCS {
 		return LCSs;
 	}
 
+	/**
+	 * Creates the table and finds all possible LCS solutions based on whether you
+	 * request to find them by means of bottom up or top down.
+	 * 
+	 * @param rStr      The String found along the table's rows
+	 * @param cStr      The String found along the table's cols
+	 * @param isTopDown The boolean seeing if the table should be constructed by
+	 *                  means of top down or bottom up dynamic programming
+	 * @return The longest common subsequence between rStr and cStr + [Side Effect]
+	 *         sets memoCheck to refer to table
+	 */
+	public static Set<String> executeLCS(String rStr, String cStr, boolean isTopDown) {
+		rStr = "0" + rStr;
+		cStr = "0" + cStr;
+		memoCheck = new int[rStr.length()][cStr.length()];
+		if (isTopDown) {
+			boolean[][] haveVisited = new boolean[rStr.length() + 1][cStr.length() + 1];
+			topDownTableFill(rStr, cStr, rStr.length() - 1, cStr.length() - 1, haveVisited, memoCheck);
+		} else {
+			memoCheck = bottomUpTableFill(rStr, cStr, memoCheck);
+		}
+		return collectSolution(rStr, cStr, rStr.length() - 1, cStr.length() - 1, memoCheck);
+	}
+
 // -----------------------------------------------
 // Bottom-Up LCS
 // -----------------------------------------------
@@ -80,13 +104,8 @@ public class LCS {
 	 * @return The longest common subsequence between rStr and cStr + [Side Effect]
 	 *         sets memoCheck to refer to table
 	 */
-
 	public static Set<String> bottomUpLCS(String rStr, String cStr) {
-		int[][] bottomUpTable = new int[rStr.length()][cStr.length()];
-		rStr = "0" + rStr;
-		cStr = "0" + cStr;
-		memoCheck = bottomUpTableFill(rStr, cStr, bottomUpTable);
-		return collectSolution(rStr, cStr, rStr.length() - 1, cStr.length() - 1, memoCheck);
+		return executeLCS(rStr, cStr, false);
 	}
 
 	/**
@@ -139,12 +158,7 @@ public class LCS {
 	 *         sets memoCheck to refer to table
 	 */
 	public static Set<String> topDownLCS(String rStr, String cStr) {
-		boolean[][] haveVisited = new boolean[rStr.length() + 1][cStr.length() + 1];
-		rStr = "0" + rStr;
-		cStr = "0" + cStr;
-		memoCheck = new int[rStr.length()][cStr.length()];
-		topDownTableFill(rStr, cStr, rStr.length() - 1, cStr.length() - 1, haveVisited, memoCheck);
-		return collectSolution(rStr, cStr, rStr.length() - 1, cStr.length() - 1, memoCheck);
+		return executeLCS(rStr, cStr, true);
 	}
 
 	/**
